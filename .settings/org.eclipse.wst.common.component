@@ -5,18 +5,6 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/webapp"/>
-        <dependent-module archiveName="smartui-client-1.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/smartui-client/smartui-client">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="base-client-1.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/base-client/base-client">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="smartui-model-1.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/smartui-model/smartui-model">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="base-model-1.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/base-model/base-model">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <property name="context-root" value="smartui-manage"/>
         <property name="java-output-path" value="/smartui-manage/target/classes"/>
     </wb-module>

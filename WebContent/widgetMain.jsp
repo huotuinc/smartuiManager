@@ -37,7 +37,7 @@
 							fitColumns : true,
 							columns : [ [
 									{
-										field : 'href',
+										field : 'id',
 										checkbox : true
 									},
 									{
@@ -70,8 +70,8 @@
 										align : 'center',
 										width : 100,
 										formatter : function(value, rec) {
-											if (null != rec.browseTemplateResourceValue)
-												return '<a target="_blank" rel="nofollow" href=\''+rec.browseTemplateResourceValue+'\' >浏览资源</a>';
+											if (null != rec.browseTemplateResource)
+												return '<a target="_blank" rel="nofollow" href=\''+rec.browseTemplateResource.value+'\' >浏览资源</a>';
 											else
 												return null;
 										}
@@ -82,8 +82,8 @@
 										align : 'center',
 										width : 100,
 										formatter : function(value, rec) {
-											if (null != rec.editTemplateResourceValue)
-												return '<a target="_blank" rel="nofollow" href=\''+rec.editTemplateResourceValue+'\' >编辑资源</a>';
+											if (null != rec.editTemplateResource)
+												return '<a target="_blank" rel="nofollow" href=\''+rec.editTemplateResource.value+'\' >编辑资源</a>';
 											else
 												return null;
 										}
@@ -107,7 +107,7 @@
 										align : 'center',
 										formatter : function(value, rec) {
 											var btn = '<a href="javascript:openWin(\''
-													+ rec.href
+													+ rec.id
 													+ '\')"  >上传资源</a>';
 											return btn;
 										}
@@ -119,7 +119,7 @@
 										align : 'center',
 										formatter : function(value, rec) {
 											var btn = '<a href="javascript:updateTemplate(\''
-												+ rec.href
+												+ rec.id
 												+ '\')"  >更改资源</a>';
 											return btn;
 										}
@@ -139,14 +139,14 @@
 								return '<div id="detailForm-'+index+'"></div>';
 							},
 							onExpandRow : function(index, row) {
-								var href = row.href;
+								var id = row.id;
 								$('#detailForm-' + index).panel(
 										{
 											doSize : true,
 											border : false,
 											cache : false,
-											href : 'widgetMain/view?href='
-													+ href,
+											href : 'widgetMain/view?id='
+													+ id,
 											onLoad : function() {
 												$('#list-table').edatagrid(
 														'fixDetailRowHeight',
@@ -175,6 +175,15 @@
 				$.messager.progress('close');
 			}
 		});
+		$('#widgetType').combobox({
+            url : 'widgetType/list2',
+            method : "get",
+            hiddenName : 'id',
+            valueField : 'id',
+            textField : 'name',
+            required : true,
+            editable : false
+        });
 	})
 
 	var isEdit = false;
@@ -202,15 +211,6 @@
 			title : "新增控件主体"
 		});
 		$('#fm').form('clear');
-		$('#widgetType').combobox({
-			url : 'widgetType/list2',
-			method : "get",
-			hiddenName : 'href',
-			valueField : 'href',
-			textField : 'name',
-			required : true,
-			editable : false
-		});
 		isEdit = false;
 		$("#win").window('open');
 	}
@@ -224,15 +224,16 @@
 		$("#addMainButton").linkbutton("disable");
 		if (isEdit) {
 			var record = $('#list-table').edatagrid('getSelected');
+			$("#win").window('close');
 			$.ajax({
 				url : 'widgetMain/update',
 				method : "post",
 				data : {
-					"href" : record.href,
+					"id" : record.id,
 					"name" : $("#name").val(),
 					"description" : $("#description").val(),
 					"orderWeight" : $("#orderWeight").val(),
-					"type" : $("#widgetType").combobox('getValue'),
+					"typeId" : $("#widgetType").combobox('getValue'),
 					"properties" : $("#properties").textbox('getValue')
 				},
 				success : function(result) {
@@ -240,7 +241,6 @@
 						$.messager.alert('提示', '编辑成功!', 'info');
 						refresh();
 						$('#fm').form('clear');
-						$("#win").window('close');
 						$("#addMainButton").linkbutton("enable");
 						isEdit = false;
 					} else {
@@ -256,6 +256,7 @@
                 }
 			})
 		} else {
+			$("#win").window('close');
 			$.ajax({
 				url : 'widgetMain/insert',
 				method : "post",
@@ -263,7 +264,7 @@
 					"name" : $("#name").val(),
 					"description" : $("#description").val(),
 					"orderWeight" : $("#orderWeight").val(),
-					"type" : $("#widgetType").combobox('getValue'),
+					"typeId" : $("#widgetType").combobox('getValue'),
 					"properties" : $("#properties").textbox('getValue')
 				},
 				success : function(result) {
@@ -271,7 +272,6 @@
 						$.messager.alert('提示', '新增成功!', 'info');
 						refresh();
 						$('#fm').form('clear');
-						$("#win").window('close');
 						$("#addMainButton").linkbutton("enable");
 					} else {
 						$.messager.alert('提示', '新增失败：' + result.msg, 'info');
@@ -286,14 +286,15 @@
 		}
 	}
 
-	function openWin(href) {
+	function openWin(id) {
 		$('#fm2').form('clear');
-		$("#path").val(href);
+		$("#path").val(id);
 		$("#win2").window('open');
 	}
 
 	function upload() {
-		$("#href").val($("#path").val());
+		$("#typeId").val($("#path").val());
+		$("#win2").window('close');
 		$('#fm2').form('submit', {
 			url : 'widgetMain/upload',
 			method : "post",
@@ -303,7 +304,6 @@
 					$.messager.alert('提示', '上传成功!', 'info');
 					refresh();
 					$('#fm2').form('clear');
-					$("#win2").window('close');
 				} else {
 					$.messager.alert('提示', data.msg, 'info');
 				}
@@ -326,22 +326,13 @@
 			$.messager.alert('提示', '请选择一项进行操作!', 'info');
 			return;
 		}
-		$('#widgetType').combobox({
-			url : 'widgetType/list2',
-			method : "get",
-			hiddenName : 'href',
-			valueField : 'href',
-			textField : 'name',
-			required : true,
-			editable : false
-		});
+		$("#win").window('open');
 		$("#name").textbox('setValue', record.name);
 		$("#description").val(record.description);
 		$("#orderWeight").val(record.orderWeight);
-		$("#widgetType").combobox('setValue', record.typeHref);
 		if (null != record.properties)
 			$("#properties").textbox('setValue', $.toJSON(record.properties));
-		$("#win").window('open');
+		$("#widgetType").combobox('setValue', record.type.id);
 	}
 
 	function deleteMain() {
@@ -356,7 +347,7 @@
 					url : 'widgetMain/delete',
 					method : "post",
 					data : {
-						"href" : record.href
+						"id" : record.id
 					},
 					success : function(result) {
 						if (result.success) {
@@ -384,7 +375,7 @@
 			url : 'widgetMain/getTemplate',
 			method : "get",
 			data : {
-				"href" : $("#path").val(),
+				"id" : $("#path").val(),
 				"type" : $(":input[name=tempLateType]:checked").val()
 			},
 			success : function(result) {
@@ -414,7 +405,7 @@
 			url : 'widgetMain/saveTemplate',
 			method : "post",
 			data : {
-				"href" : $("#path").val(),
+				"id" : $("#path").val(),
 				"type" : $(":input[name=tempLateType]:checked").val(),
 				"content" : $("#content").textbox('getValue')
 			},
@@ -516,7 +507,7 @@
 				<tr>
 					<td>上传资源：</td>
 					<td><input type="file" name="file" /> <input type="hidden"
-						name="href" id="href" /></td>
+						name="id" id="typeId" /></td>
 				</tr>
 				<tr>
 					<td>文件类型:</td>

@@ -45,15 +45,15 @@
 					},
 					{field:'iconResourceValue',title:'分类',align:'center',width:100,
 			            formatter:function(value,rec){
-			            	if(null!=rec.iconResourceValue)
-			            		return '<img src="'+rec.iconResourceValue+'"/>';
+			            	if(null!=rec.iconResource)
+			            		return '<img src="'+rec.iconResource.value+'"/>';
 			            	else
 			            		return null;
 			            }
 					},
 					{field:'opt',title:'操作',width:100,align:'center',
 			            formatter:function(value,rec){
-			                var btn = '<a onclick="editRow(\''+rec.href+'\')" href="#" icon="icon-search">更新图片</a>';
+			                var btn = '<a onclick="editRow(\''+rec.id+'\')" href="#" icon="icon-search">更新图片</a>';
 			                return btn;
 			            }
 			        }
@@ -108,26 +108,26 @@
 		function saveType(){
 			if(isEdit){
 				var record = $('#list-table').edatagrid('getSelected');
+				$("#win").window('close');
 				$.ajax({
 					url: 'widgetType/update',
 	                method:"post",
-	                data:{"href":record.href,"name":$("#name").val(),"orderWeight":$("#orderWeight").val(),"scopeName":$("input[name='scopeName']:checked").val()},
+	                data:{"id":record.id,"name":$("#name").val(),"orderWeight":$("#orderWeight").val(),"scopeName":$("input[name='scopeName']:checked").val()},
 	                success: function(result){
 	                	if(result.success){
 	                		$.messager.alert('提示','编辑成功!','info');
-	                		refresh();
 		                	$("#win").window('close');
 		                	$('#fm').form('clear');
 	                	}else{
 	                		$.messager.alert('提示','编辑失败!','info');
 	                		refresh();
-		                	$("#win").window('close');
 		                	$('#fm').form('clear');
 	                	}
 	                }
 				})
 				isEdit = false;
 			}else{
+				$("#win").window('close');
 				$.ajax({
                     url: 'widgetType/add',
                     method:"post",
@@ -136,12 +136,10 @@
                         if(result.success){
                         	$.messager.alert('提示','新增成功!','info');
                             refresh();
-                            $("#win").window('close');
                             $('#fm').form('clear');
                         }else{
                             $.messager.alert('提示','新增失败!','info');
                             refresh();
-                            $("#win").window('close');
                             $('#fm').form('clear');
                         }
                     }
@@ -161,18 +159,18 @@
 			$("#win").window('open');
 			$("#name").val(record.name);
 			$("#orderWeight").val(record.orderWeight);
-			if(record.scopeName=="global"){
+			if(record.scope=="global"){
 				$("#global").prop("checked",true);
-			}else if(record.scopeName=="sis"){
+			}else if(record.scope=="sis"){
 				$("#sis").prop("checked",true);
-			}else if(record.scopeName=="system"){
+			}else if(record.scope=="system"){
 				$("#system").prop("checked",true);
 			}
 		}
 
-		function editRow(href){
+		function editRow(id){
 			$('#fm2').form('clear');
-			$("#href2").val(href);
+			$("#href2").val(id);
 			$("#iconType").val("iconResource");
 			$("#win2").window('open');
 		}
@@ -206,7 +204,7 @@
 					$.ajax({
 						url: 'widgetType/delete',
 						method:"post",
-		                data:{"href":record.href},
+		                data:{"id":record.id},
 		                success: function(result){
 		                	if(result.success){
 		                		$.messager.alert('提示','删除成功!','info');
@@ -268,7 +266,7 @@
     			<tr>
     				<td>上传附件</td>
     				<td>
-    					<input type="hidden" name="href" id="href2"/>
+    					<input type="hidden" name="id" id="href2"/>
     					<input type="hidden"name="type" id="iconType"/>
     	 				<input type="file" name="file"/>
     	 			</td>

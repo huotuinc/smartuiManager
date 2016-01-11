@@ -16,8 +16,8 @@
 	src="jquery-easyui/jquery.edatagrid.js"></script>
 	<script type="text/javascript"
 	src="jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
-<script type="text/javascript" 
-	src="jquery-easyui/datagrid-detailview.js"></script> 
+<script type="text/javascript"
+	src="jquery-easyui/datagrid-detailview.js"></script>
 <title>登录</title>
 <script type="text/javascript">
 </script>
@@ -38,6 +38,12 @@
     	 				<input type="text"name="appkey" id="appkey"></input>
     	 			</td>
     			</tr>
+    			<tr>
+                    <td>apiRoot:</td>
+                    <td>
+                        <input type="text"name="apiRoot" id="apiRoot"></input>
+                    </td>
+                </tr>
     			<tr>
                      <td colspan='2'><input name="submit" type="submit"
                          value="submit" /></td>

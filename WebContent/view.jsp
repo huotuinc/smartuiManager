@@ -18,14 +18,14 @@
 	src="jquery-easyui/jquery.edatagrid.js"></script>
 	<script type="text/javascript"
 	src="jquery-easyui/locale/easyui-lang-zh_CN.js"></script>
-<script type="text/javascript" 
-	src="jquery-easyui/datagrid-detailview.js"></script> 
+<script type="text/javascript"
+	src="jquery-easyui/datagrid-detailview.js"></script>
 <title></title>
 </head>
 <body>
-	
+
 	<div style="text-align:center;padding:20px;">
-		<img src="${main.thumbnailResourceValue}"/>
+		<img src="${main.thumbnailResource.value}"/>
 	</div>
 </body>
 </html>

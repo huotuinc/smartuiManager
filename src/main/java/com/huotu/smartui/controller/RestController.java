@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -45,24 +44,6 @@ public class RestController {
 
     @Autowired
     private WidgetTypeRespository widgetTypeRespository;
-
-    /**
-     * 设置权限
-     * @param user
-     * @param appkey
-     * @return
-     */
-    @RequestMapping(value="/login" ,method=RequestMethod.POST)
-    @ResponseBody
-    public ModelMap login(String user,String appkey,HttpServletRequest request) throws IOException{
-        HttpSession session = request.getSession();
-        session.setMaxInactiveInterval(60*60);
-        session.setAttribute("user", user);
-        session.setAttribute("appkey", appkey);
-        widgetMainRepository.updateRole(user, appkey);
-        widgetTypeRespository.updateRole(user, appkey);
-        return ResultUtil.success();
-    }
 
 	/**
 	 * 显示控件主体
