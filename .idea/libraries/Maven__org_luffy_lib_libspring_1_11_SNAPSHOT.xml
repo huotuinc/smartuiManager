@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.luffy.lib:libspring:1.11-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/luffy/lib/libspring/1.11-SNAPSHOT/libspring-1.11-20160113.062837-11.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/luffy/lib/libspring/1.11-SNAPSHOT/libspring-1.11-20160113.062837-11-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/luffy/lib/libspring/1.11-SNAPSHOT/libspring-1.11-20160113.062837-11-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
