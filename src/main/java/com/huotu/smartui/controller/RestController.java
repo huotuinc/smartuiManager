@@ -17,6 +17,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -67,12 +68,19 @@ public class RestController {
     @RequestMapping(value = {"/widgetMain/list"}, method = {
             RequestMethod.GET})
     @ResponseBody
-    public ModelMap list(String rows, String page, HttpServletRequest request) throws IOException {
+    public ModelMap list(Long typeId, String name, String rows, String page, HttpServletRequest request) throws IOException {
         setSecretKey(request);
         ModelMap map = new ModelMap();
         Pageable pageable = new PageRequest(Integer.parseInt(page) - 1,
                 Integer.parseInt(rows));
-        Page<WidgetMain> widgetMains = widgetMainRepository.findAll(pageable);
+        if (Objects.nonNull(typeId) && typeId.equals(0L)) {
+            typeId = null;
+        }
+        if (Objects.nonNull(name) && name.equals("")) {
+            name = null;
+        }
+//        Page<WidgetMain> widgetMains = widgetMainRepository.findAll(pageable);
+        Page<WidgetMain> widgetMains = widgetMainRepository.findAllByNameAndType(typeId, name, pageable);
         map.addAttribute("total", Long.valueOf(widgetMains.getTotalElements()));
         map.addAttribute("rows", widgetMains.getContent());
         return map;
@@ -282,6 +290,32 @@ public class RestController {
             model.setTitle(widgetType.getName() + "(" + widgetType.getScope().toString() + ")");
             models.add(model);
         }
+        return models;
+    }
+
+    @RequestMapping(value = {"/widgetType/listSearch"}, method = {RequestMethod.GET})
+    @ResponseBody
+    public List<WidgetTypeModel> listSearch(HttpServletRequest request) throws IOException {
+        setSecretKey(request);
+        Pageable pageable = new PageRequest(0, 50);
+        List<WidgetType> list = widgetTypeRespository.findAll(pageable).getContent();
+        List<WidgetTypeModel> models = new ArrayList<>();
+        WidgetTypeModel oneModel = new WidgetTypeModel();
+        oneModel.setTitle("所有");
+        oneModel.setId(0L);
+        models.add(oneModel);
+//        for (WidgetType widgetType : list) {
+//            WidgetTypeModel model = new WidgetTypeModel();
+//            model.setId(widgetType.getId());
+//            model.setTitle(widgetType.getName() + "(" + widgetType.getScope().toString() + ")");
+//            models.add(model);
+//        }
+        list.stream().forEach(widgetType -> {
+            WidgetTypeModel model = new WidgetTypeModel();
+            model.setId(widgetType.getId());
+            model.setTitle(widgetType.getName() + "(" + widgetType.getScope().toString() + ")");
+            models.add(model);
+        });
         return models;
     }
 

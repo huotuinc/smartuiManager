@@ -218,6 +218,17 @@
                 required: true,
                 editable: false
             });
+
+            $("#typeCombobox").combobox({
+                url: 'widgetType/listSearch',
+                method: "get",
+                hiddenName: 'id',
+                valueField: 'id',
+                width: 300,
+                textField: 'title',
+                required: true,
+                editable: false
+            });
         })
 
         var isEdit = false;
@@ -489,6 +500,15 @@
                 }
             })
         }
+
+        function findData(){
+            var name = $("#nameSearch").val();
+            var type = $("#typeCombobox").combobox('getValue');
+            $("#list-table").datagrid('load',{
+                name :name,
+                typeId:type
+            })
+        }
     </script>
     <title>控件主体管理</title>
 
@@ -505,13 +525,12 @@
         <a href="javascript:void(0)" class="easyui-linkbutton"
            iconCls="icon-remove" plain="true" onclick="javascript:deleteMain()">删除</a>
     </div>
-    <!--  <div>
-        名字: <input type="text" style="width: 100px"/>分类: <input
-            class="easyui-combobox" style="width: 100px"
-            url="data/combobox_data.json" valueField="id" textField="text">
-        <a href="javascript:void(0)" class="easyui-linkbutton"
+    <div>
+        名字: <input type="text" id="nameSearch" style="width: 100px"/>分类: <input
+            class="easyui-combobox" id="typeCombobox">
+        <a href="javascript:findData()" class="easyui-linkbutton"
             iconCls="icon-search">Search</a>
-    </div>-->
+    </div>
 </div>
 
 <div id="win" class="easyui-window" title="新增控件主体" closed="true"
