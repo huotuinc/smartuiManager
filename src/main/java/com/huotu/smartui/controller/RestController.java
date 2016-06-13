@@ -107,10 +107,16 @@ public class RestController {
             return ResultUtil.failure("下拉框或者控件名字未填!");
         WidgetMain main = new WidgetMain();
         main.setName(name);
-        main.setDescription(description);
-        main.setOrderWeight(orderWeight.intValue());
-        main.setVersion(version);
-        main.setNativeType(nativeType);
+        if (!"".equals(description) && Objects.nonNull(description))
+            main.setDescription(description);
+        if ("".equals(orderWeight) || Objects.isNull(orderWeight))
+            main.setOrderWeight(50);
+        else
+            main.setOrderWeight(orderWeight);
+        if (!"".equals(version) && Objects.nonNull(version))
+            main.setVersion(version);
+        if (!"".equals(nativeType) && Objects.nonNull(nativeType))
+            main.setNativeType(nativeType);
         if (null == appSupportVersion)
             appSupportVersion = 0;
         main.setAppSupportVersion(appSupportVersion);
@@ -118,6 +124,12 @@ public class RestController {
             WidgetType type = widgetTypeRespository.getOneByPK(typeId);
             main.setType(type);
             main = widgetMainRepository.insert(main);
+
+        } catch (IOException e) {
+            return ResultUtil.failure("基本信息新增失败");
+        }
+
+        try {
             if (properties != null && !"".equals(properties)) {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> data = mapper.readValue(properties, WidgetProperties.class);
@@ -125,7 +137,7 @@ public class RestController {
             }
             return ResultUtil.success();
         } catch (IOException e) {
-            return ResultUtil.failure("无此控件类型");
+            return ResultUtil.failure("属性新增失败");
         }
     }
 
@@ -140,7 +152,7 @@ public class RestController {
         Map<String, Object> data;
         WidgetMain main;
         if ("".equals(typeId) || "".equals(typeId))
-            return ResultUtil.failure("下拉框或者控件名字未填!");
+            return ResultUtil.failure("分类或者控件名字未填!");
         if (properties != null && !"".equals(properties)) {
             mapper = new ObjectMapper();
             data = mapper.readValue(properties, WidgetProperties.class);
@@ -150,9 +162,12 @@ public class RestController {
         main = widgetMainRepository.getOneByPK(id);
         main.setType(type);
         main.setName(name);
-        main.setDescription(description);
-        main.setOrderWeight(orderWeight.intValue());
-        main.setNativeType(nativeType);
+        if (!"".equals(description) && Objects.nonNull(description))
+            main.setDescription(description);
+        if (!"".equals(orderWeight) && Objects.nonNull(orderWeight))
+            main.setOrderWeight(orderWeight);
+        if (!"".equals(nativeType) && Objects.nonNull(nativeType))
+            main.setNativeType(nativeType);
         if (null == appSupportVersion)
             appSupportVersion = 0;
         main.setAppSupportVersion(appSupportVersion);

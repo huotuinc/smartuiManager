@@ -229,6 +229,13 @@
                 required: true,
                 editable: false
             });
+
+            $('#win3').window({
+                onBeforeClose: function () { //当面板关闭之前触发的事件
+                    refresh();
+                    $("#fm3").form("clear");
+                }
+            })
         })
 
         var isEdit = false;
@@ -435,8 +442,14 @@
                 success: function (result) {
                     if (result.success)
                         $("#content").textbox('setValue', result.data);
-                    else
-                        $.messager.alert('提示', result.msg, 'info');
+                    else{
+                        $.messager.show({
+                            title: "提示",
+                            msg: result.msg,
+                            showType: 'slide',
+                            timeout: 500
+                        });
+                    }
                 }
             })
         }
@@ -465,10 +478,7 @@
                 },
                 success: function (result) {
                     if (result.success) {
-                        refresh();
                         $.messager.alert('提示', "更新成功!", 'info');
-                        $("#win3").window('close');
-                        $("#fm3").form("clear");
                         $("#templateButton").linkbutton("enable");
                     } else {
                         $.messager.alert('提示', result.msg, 'info');
@@ -569,7 +579,7 @@
             <tr>
                 <td>原生主键类型：</td>
                 <td><input name="nativeType" class="easyui-combobox"
-                           id="widgetNativeType"/></td>
+                           id="widgetNativeType" required="false"/></td>
             </tr>
             <tr>
                 <td>属性:</td>
