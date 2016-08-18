@@ -11,18 +11,6 @@ import com.huotu.huobanplus.smartui.sdk.WidgetTypeRespository;
 import com.huotu.smartui.model.NativeTypeModel;
 import com.huotu.smartui.model.WidgetTypeModel;
 import com.huotu.smartui.utils.ResultUtil;
-
-import java.io.*;
-import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +24,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Controller
 public class RestController {
@@ -342,12 +342,7 @@ public class RestController {
         WidgetType type = new WidgetType();
         type.setName(name);
         type.setOrderWeight(orderWeight.intValue());
-        if ("global".equals(scopeName))
-            type.setScope(Scope.global);
-        else if ("sis".equals(scopeName))
-            type.setScope(Scope.sis);
-        else if ("system".equals(scopeName))
-            type.setScope(Scope.system);
+        setScopeValue(type, scopeName);
         widgetTypeRespository.insert(type);
         return ResultUtil.success();
     }
@@ -360,13 +355,24 @@ public class RestController {
         WidgetType type = widgetTypeRespository.getOneByPK(id);
         type.setName(name);
         type.setOrderWeight(orderWeight.intValue());
+        setScopeValue(type, scopeName);
+        return ResultUtil.success();
+    }
+
+    private WidgetType setScopeValue(WidgetType type, String scopeName) {
         if ("global".equals(scopeName))
             type.setScope(Scope.global);
         else if ("sis".equals(scopeName))
             type.setScope(Scope.sis);
         else if ("system".equals(scopeName))
             type.setScope(Scope.system);
-        return ResultUtil.success();
+        else if ("common".equals(scopeName))
+            type.setScope(Scope.common);
+        else if ("agent".equals(scopeName))
+            type.setScope(Scope.agent);
+        else if ("supplier".equals(scopeName))
+            type.setScope(Scope.supplier);
+        return type;
     }
 
     @RequestMapping(value = {"/widgetType/delete"}, method = {RequestMethod.POST})
