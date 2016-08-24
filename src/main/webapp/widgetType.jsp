@@ -96,6 +96,17 @@
                     $.messager.progress('close');
                 }
             });
+
+            $("#scopeCombobox").combobox({
+                url: 'widgetType/scopeSearch',
+                method: "get",
+                hiddenName: 'name',
+                valueField: 'name',
+                width: 100,
+                textField: 'description',
+                required: true,
+                editable: false
+            });
         })
 
         function refresh() {
@@ -261,6 +272,13 @@
             })
         }
 
+        function findData(){
+            var scope = $("#scopeCombobox").combobox('getValue');
+            $("#list-table").datagrid('load',{
+                scope:scope
+            })
+        }
+
     </script>
     <title>模板分类管理</title>
 
@@ -275,6 +293,12 @@
             iconCls="icon-edit" plain="true" onclick="javascript:edit()">编辑</a> <a
             href="javascript:void(0)" class="easyui-linkbutton"
             iconCls="icon-remove" plain="true" onclick="javascript:deleteType()">删除</a>
+    </div>
+    <div>
+        范畴: <input
+            class="easyui-combobox" id="scopeCombobox">
+        <a href="javascript:findData()" class="easyui-linkbutton"
+           iconCls="icon-search">Search</a>
     </div>
 </div>
 <div id="win" class="easyui-window" title="新增分类" closed="true"
@@ -301,7 +325,7 @@
                     <input type="radio" name="scopeName" value="agent"
                            id="agent"/>代理商
                     <input type="radio" name="scopeName" value="supplier"
-                           id="supplier"/>供货商
+                           id="supplier"/>供应商
                 </td>
             </tr>
         </table>

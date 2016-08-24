@@ -7,8 +7,9 @@ import com.huotu.huobanplus.smartui.entity.WidgetType;
 import com.huotu.huobanplus.smartui.entity.support.Scope;
 import com.huotu.huobanplus.smartui.entity.support.WidgetProperties;
 import com.huotu.huobanplus.smartui.sdk.WidgetMainRepository;
-import com.huotu.huobanplus.smartui.sdk.WidgetTypeRespository;
+import com.huotu.huobanplus.smartui.sdk.WidgetTypeRepository;
 import com.huotu.smartui.model.NativeTypeModel;
+import com.huotu.smartui.model.ScopeModel;
 import com.huotu.smartui.model.WidgetTypeModel;
 import com.huotu.smartui.utils.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +44,12 @@ public class RestController {
     @Autowired
     private WidgetMainRepository widgetMainRepository;
     @Autowired
-    private WidgetTypeRespository widgetTypeRespository;
+    private WidgetTypeRepository widgetTypeRepository;
 
     @PostConstruct
     public void setErrorSecretKey() throws IOException {
         widgetMainRepository.updateRole("demo", "1f2f3f4f5f6f7f8f9f");
-        widgetTypeRespository.updateRole("demo", "1f2f3f4f5f6f7f8f9f");
+        widgetTypeRepository.updateRole("demo", "1f2f3f4f5f6f7f8f9f");
     }
 
     @RequestMapping(value = {"/login"}, method = {RequestMethod.POST})
@@ -60,7 +61,7 @@ public class RestController {
         session.setAttribute("appkey", appkey);
         if (apiRoot != null && apiRoot != "") {
             widgetMainRepository.setRootHref(apiRoot);
-            widgetTypeRespository.setRootHref(apiRoot);
+            widgetTypeRepository.setRootHref(apiRoot);
         }
         return ResultUtil.success();
     }
@@ -98,6 +99,20 @@ public class RestController {
         }
     }
 
+    @RequestMapping(value = "/widgetType/scopeSearch", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ScopeModel> scopeSearch(){
+        Map<Scope,String> map = Scope.getAllScopes();
+        List<ScopeModel> list = new ArrayList<>();
+        map.forEach((scope, s) -> {
+            ScopeModel model = new ScopeModel();
+            model.setName(scope.name());
+            model.setDescription(s);
+            list.add(model);
+        });
+        return list;
+    }
+
     @RequestMapping(value = {"/widgetMain/insert"}, method = {RequestMethod.POST})
     @ResponseBody
     public ModelMap addWidgetMain(String name, String description, Long typeId, String properties, Integer orderWeight, Integer nativeType, @RequestParam(required = false) String version,
@@ -121,7 +136,7 @@ public class RestController {
             appSupportVersion = 0;
         main.setAppSupportVersion(appSupportVersion);
         try {
-            WidgetType type = widgetTypeRespository.getOneByPK(typeId);
+            WidgetType type = widgetTypeRepository.getOneByPK(typeId);
             main.setType(type);
             main = widgetMainRepository.insert(main);
 
@@ -158,7 +173,7 @@ public class RestController {
             data = mapper.readValue(properties, WidgetProperties.class);
             widgetMainRepository.patchByPK(id, "properties", data);
         }
-        type = widgetTypeRespository.getOneByPK(typeId);
+        type = widgetTypeRepository.getOneByPK(typeId);
         main = widgetMainRepository.getOneByPK(id);
         main.setType(type);
         main.setName(name);
@@ -266,12 +281,16 @@ public class RestController {
 
     @RequestMapping(value = {"/widgetType/list"}, method = {RequestMethod.GET})
     @ResponseBody
-    public ModelMap listType(String rows, String page, HttpServletRequest request) throws IOException {
+    public ModelMap listType(String rows, String page,Scope scope, HttpServletRequest request) throws IOException {
         setSecretKey(request);
         ModelMap map = new ModelMap();
         Pageable pageable = new PageRequest(Integer.parseInt(page) - 1,
                 Integer.parseInt(rows));
-        Page<WidgetType> pages = widgetTypeRespository.findAll(pageable);
+        Page<WidgetType> pages;
+        if(Objects.isNull(scope))
+            pages = widgetTypeRepository.findAll(pageable);
+        else
+            pages = widgetTypeRepository.findAllByScope(scope,pageable);
         map.addAttribute("total", Long.valueOf(pages.getTotalElements()));
         map.addAttribute("rows", pages.getContent());
         return map;
@@ -297,7 +316,7 @@ public class RestController {
     public List<WidgetTypeModel> listType2(HttpServletRequest request) throws IOException {
         setSecretKey(request);
         Pageable pageable = new PageRequest(0, 50);
-        List<WidgetType> list = widgetTypeRespository.findAll(pageable).getContent();
+        List<WidgetType> list = widgetTypeRepository.findAll(pageable).getContent();
         List<WidgetTypeModel> models = new ArrayList<>();
         for (WidgetType widgetType : list) {
             WidgetTypeModel model = new WidgetTypeModel();
@@ -313,7 +332,7 @@ public class RestController {
     public List<WidgetTypeModel> listSearch(HttpServletRequest request) throws IOException {
         setSecretKey(request);
         Pageable pageable = new PageRequest(0, 50);
-        List<WidgetType> list = widgetTypeRespository.findAll(pageable).getContent();
+        List<WidgetType> list = widgetTypeRepository.findAll(pageable).getContent();
         List<WidgetTypeModel> models = new ArrayList<>();
         WidgetTypeModel oneModel = new WidgetTypeModel();
         oneModel.setTitle("所有");
@@ -343,7 +362,7 @@ public class RestController {
         type.setName(name);
         type.setOrderWeight(orderWeight.intValue());
         setScopeValue(type, scopeName);
-        widgetTypeRespository.insert(type);
+        widgetTypeRepository.insert(type);
         return ResultUtil.success();
     }
 
@@ -352,7 +371,7 @@ public class RestController {
     public ModelMap updateWidgetType(Long id, String name, Integer orderWeight, String scopeName,
                                      HttpServletRequest request) throws IOException {
         setSecretKey(request);
-        WidgetType type = widgetTypeRespository.getOneByPK(id);
+        WidgetType type = widgetTypeRepository.getOneByPK(id);
         type.setName(name);
         type.setOrderWeight(orderWeight.intValue());
         setScopeValue(type, scopeName);
@@ -380,7 +399,7 @@ public class RestController {
     @Transactional
     public ModelMap deleteType(Long id, HttpServletRequest request) throws IOException {
         setSecretKey(request);
-        widgetTypeRespository.deleteByPK(id);
+        widgetTypeRepository.deleteByPK(id);
         return ResultUtil.success();
     }
 
@@ -393,7 +412,7 @@ public class RestController {
         if (inputStream.available() == 0) {
             return ResultUtil.failure("不能上传空文件");
         } else {
-            widgetTypeRespository.putResource(id, type, inputStream);
+            widgetTypeRepository.putResource(id, type, inputStream);
             return ResultUtil.success();
         }
     }
@@ -430,7 +449,7 @@ public class RestController {
         if (session.getAttribute("user") != null && session.getAttribute("appkey") != null) {
             widgetMainRepository.updateRole(session.getAttribute("user").toString(),
                     session.getAttribute("appkey").toString());
-            widgetTypeRespository.updateRole(session.getAttribute("user").toString(),
+            widgetTypeRepository.updateRole(session.getAttribute("user").toString(),
                     session.getAttribute("appkey").toString());
         } else {
             setErrorSecretKey();
