@@ -12,6 +12,8 @@ import com.huotu.smartui.model.NativeTypeModel;
 import com.huotu.smartui.model.ScopeModel;
 import com.huotu.smartui.model.WidgetTypeModel;
 import com.huotu.smartui.utils.ResultUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,9 +32,8 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.*;
-import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,9 @@ public class RestController {
     private WidgetMainRepository widgetMainRepository;
     @Autowired
     private WidgetTypeRepository widgetTypeRepository;
+    private static final Log log = LogFactory.getLog(RestController.class);
+//    @Autowired
+//    private ResourceService resourceService;
 
     @PostConstruct
     public void setErrorSecretKey() throws IOException {
@@ -101,8 +105,8 @@ public class RestController {
 
     @RequestMapping(value = "/widgetType/scopeSearch", method = RequestMethod.GET)
     @ResponseBody
-    public List<ScopeModel> scopeSearch(){
-        Map<Scope,String> map = Scope.getAllScopes();
+    public List<ScopeModel> scopeSearch() {
+        Map<Scope, String> map = Scope.getAllScopes();
         List<ScopeModel> list = new ArrayList<>();
         map.forEach((scope, s) -> {
             ScopeModel model = new ScopeModel();
@@ -264,9 +268,18 @@ public class RestController {
         return ResultUtil.success();
     }
 
-    private String getContent(String path) throws MalformedURLException, IOException {
+    private String getContent(String path) throws IOException {
+
+//        Resource resource = resourceService.getResource(path);
+//        InputStream inputStream = resource.getInputStream();
+
         URL url = new URL(path);
-        URLConnection connection = url.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setConnectTimeout(6 * 1000);
+        connection.setUseCaches(false);
+        log.info(path + "get connect start");
+        if (connection.getResponseCode() != 200)
+            throw new IOException(path + "请求url失败");
         InputStream is = connection.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
         StringBuilder builder = new StringBuilder();
@@ -281,16 +294,16 @@ public class RestController {
 
     @RequestMapping(value = {"/widgetType/list"}, method = {RequestMethod.GET})
     @ResponseBody
-    public ModelMap listType(String rows, String page,Scope scope, HttpServletRequest request) throws IOException {
+    public ModelMap listType(String rows, String page, Scope scope, HttpServletRequest request) throws IOException {
         setSecretKey(request);
         ModelMap map = new ModelMap();
         Pageable pageable = new PageRequest(Integer.parseInt(page) - 1,
                 Integer.parseInt(rows));
         Page<WidgetType> pages;
-        if(Objects.isNull(scope))
+        if (Objects.isNull(scope))
             pages = widgetTypeRepository.findAll(pageable);
         else
-            pages = widgetTypeRepository.findAllByScope(scope,pageable);
+            pages = widgetTypeRepository.findAllByScope(scope, pageable);
         map.addAttribute("total", Long.valueOf(pages.getTotalElements()));
         map.addAttribute("rows", pages.getContent());
         return map;
